@@ -34,6 +34,8 @@ elseif (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
 
 endif()
 
+enable_testing()
+
 add_compile_options(${OTHER_FLAGS} ${WARN_FLAGS})
 
 # Compiler must support the C++17 standard.
@@ -45,3 +47,4 @@ include_directories(${POCKET_CSV_TEST_SOURCE_DIR})
 include_directories(../${POCKET_CSV_TEST_SOURCE_DIR})
 
 add_executable(test_parser test_parser.cc)
+add_test(NAME test_parser COMMAND test_parser)

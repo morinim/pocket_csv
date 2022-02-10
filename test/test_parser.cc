@@ -15,6 +15,13 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest.h"
 
+struct dataset_info
+{
+  bool has_header;
+  std::size_t rows;
+  std::size_t cols;
+};
+
 const std::string s_abalone_nh(R"(
 M,0.455,0.365,0.095,0.514,0.2245,0.101,0.15,15
 M,0.35,0.265,0.09,0.2255,0.0995,0.0485,0.07,7
@@ -113,30 +120,37 @@ const std::string s_numbers_h(R"(
 VALUE
 )" + s_numbers_nh);
 
+const std::vector<std::pair<std::string, dataset_info>> datasets_with_info =
+{
+  {s_abalone_h, {true, 11u, 9u}},
+  {s_abalone_nh, {false, 10u, 9u}},
+  {s_iris_h, {true, 11u, 5u}},
+  {s_iris_nh, {false, 10u, 5u}},
+  {s_car_speed_h, {true, 11u, 3u}},
+  {s_car_speed_nh, {false, 10u, 3u}},
+  {s_addresses, {false, 6u, 6u}},
+  {s_air_travel, {true, 13u, 4u}},
+  {s_colors_h, {true, 10u, 1u}},
+  {s_colors_nh, {false, 9u, 1u}},
+  {s_numbers_h, {true, 6u, 1u}},
+  {s_numbers_nh, {false, 5u, 1u}}
+};
+
 TEST_SUITE("POCKET_CSV")
 {
 
 TEST_CASE("Reading")
 {
-  const std::vector<std::string> ss =
+  for (const auto &[ds, info] : datasets_with_info)
   {
-    s_abalone_h, s_abalone_nh,
-    s_iris_h, s_iris_nh,
-    s_car_speed_h, s_car_speed_nh,
-    s_addresses,
-    s_air_travel
-  };
-
-  for (const auto &s : ss)
-  {
-    std::istringstream is(s);
+    std::istringstream is(ds);
 
     for (auto record : pocket_csv::parser(is))
-      CHECK(record.size());
+      CHECK(record.size() == info.cols);
   }
 }
 
-TEST_CASE("Reading")
+TEST_CASE("Checking specific values")
 {
   // --------------------------------------------------------------
   std::istringstream abalone(s_abalone_h);
@@ -290,23 +304,21 @@ TEST_CASE("Sniffer")
                          CHECK(csvp.active_dialect().delimiter == d);
                        });
 
-  for (const auto &t : ts)
-    for (auto c : delimiters)
-    {
-      std::string s;
-      if (c == ',')
-        s = t.first;
-      else
-        std::replace_copy(t.first.begin(), t.first.end(),
-                          std::back_inserter(s), ',', c);
+  for (const auto &[ds, info] : datasets_with_info)
+    if (info.cols > 1)
+      for (auto c : delimiters)
+      {
+        std::string s;
+        if (c == ',')
+          s = ds;
+        else
+          std::replace_copy(ds.begin(), ds.end(), std::back_inserter(s),
+                            ',', c);
 
-      controlla(s, t.second, c);
-    }
-
-  controlla(s_colors_h, true, '\n');
-  controlla(s_colors_nh, false, '\n');
-  controlla(s_numbers_h, true, '\n');
-  controlla(s_numbers_nh, false, '\n');
+        controlla(s, info.has_header, c);
+      }
+    else
+      controlla(ds, info.has_header, '\n');
 }
 
 }  // TEST_SUITE("POCKET_CSV")
