@@ -47,4 +47,4 @@ include_directories(${POCKET_CSV_TEST_SOURCE_DIR})
 include_directories(../${POCKET_CSV_TEST_SOURCE_DIR})
 
 add_executable(test_parser test_parser.cc)
-add_test(NAME test_parser COMMAND $<TARGET_FILE:test_parser>)
+add_test(NAME test_parser COMMAND test_parser)
