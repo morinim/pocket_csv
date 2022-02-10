@@ -7,13 +7,14 @@ environment:
   APPVEYOR_YML_DISABLE_PS_LINUX: true
   matrix:
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
-    - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
+    - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu2004
       CXX_COMPILER: clang++
-    - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
+    - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu2004
       CXX_COMPILER: g++
 init:
 - sh: sudo update-alternatives --set gcc /usr/bin/gcc-9
-- sh: sudo update-alternatives --set clang /usr/bin/clang-11
+#- sh: sudo update-alternatives --set clang /usr/bin/clang-11
+- sh: clang++ --version
 before_build:
 # Essentially the build command is `cmake -B build/ src/`.
 # The `-DCMAKE_BUILD_TYPE=` switch instructs cmake about the build type.
