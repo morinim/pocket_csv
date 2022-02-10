@@ -4,18 +4,19 @@ A minimal implementation of a CSV parser in C++17.
 
 Low memory footprint and ease of use are the main concerns.
 
----
-
-Highlights
-
 - Single-threaded. No additional worker threads.
 - Lazy evaluated. Tokenization is not performed until the row is read.
-- Single header file. Just include `"pocket_csv.h"`
-- Only standard C++17
+- Single header file. Just include `"pocket_csv.h"`.
+- *Automatic* delimiter guessing.
+- Only standard C++17.
 
 ## Documentation
 
+### Reading a file
 
+```c++
+
+```
 
 ## Setting up the build
 

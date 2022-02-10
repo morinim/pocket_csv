@@ -76,8 +76,8 @@ public:
   parser filter_hook(filter_hook_t) &&;
 
   class const_iterator;
-  const_iterator begin() const;
-  const_iterator end() const;
+  [[nodiscard]] const_iterator begin() const;
+  [[nodiscard]] const_iterator end() const;
 
 private:
   // DO NOT move this. `is` must be initialized before other data members.
@@ -171,15 +171,17 @@ struct char_stat
 ///
 /// \see http://stackoverflow.com/a/24425221/3235496
 ///
-std::string trim(const std::string &s)
+[[nodiscard]] inline std::string trim(const std::string &s)
 {
-  auto front = std::find_if_not(s.begin(), s.end(),
-                                [](auto c) { return std::isspace(c); });
+  const auto front(std::find_if_not(
+               s.begin(), s.end(),
+               [](auto c) { return std::isspace(c); }));
 
   // The search is limited in the reverse direction to the last non-space value
   // found in the search in the forward direction.
-  auto back = std::find_if_not(s.rbegin(), std::make_reverse_iterator(front),
-                               [](auto c) { return std::isspace(c); }).base();
+  const auto back(std::find_if_not(
+                    s.rbegin(), std::make_reverse_iterator(front),
+                    [](auto c) { return std::isspace(c); }).base());
 
   return {front, back};
 }
@@ -188,7 +190,7 @@ std::string trim(const std::string &s)
 /// \param[in] s the string to be tested
 /// \return      `true` if `s` contains a number
 ///
-bool is_number(std::string s)
+[[nodiscard]] inline bool is_number(std::string s)
 {
   s = trim(s);
 
@@ -208,7 +210,7 @@ bool is_number(std::string s)
 /// \warning
 /// Assumes a sorted input vector.
 ///
-[[nodiscard]] std::vector<char_stat> mode(const std::vector<unsigned> &v)
+[[nodiscard]] inline std::vector<char_stat> mode(const std::vector<unsigned> &v)
 {
   assert(std::is_sorted(v.begin(), v.end()));
 
@@ -242,7 +244,7 @@ bool is_number(std::string s)
   return ret;
 }
 
-[[nodiscard]] int find_column_tag(const std::string &s)
+[[nodiscard]] inline int find_column_tag(const std::string &s)
 {
   const auto ts(detail::trim(s));
 
@@ -254,7 +256,7 @@ bool is_number(std::string s)
   return static_cast<int>(s.length());
 }
 
-[[nodiscard]] bool capitalized(std::string s)
+[[nodiscard]] inline bool capitalized(std::string s)
 {
   s = detail::trim(s);
 
@@ -267,7 +269,7 @@ bool is_number(std::string s)
                         });
 }
 
-[[nodiscard]] bool lower_case(const std::string &s)
+[[nodiscard]] inline bool lower_case(const std::string &s)
 {
   return std::all_of(s.begin(), s.end(),
                      [](auto c)
@@ -276,7 +278,7 @@ bool is_number(std::string s)
                      });
 }
 
-[[nodiscard]] bool upper_case(const std::string &s)
+[[nodiscard]] inline bool upper_case(const std::string &s)
 {
   return std::all_of(s.begin(), s.end(),
                      [](auto c)
@@ -285,7 +287,8 @@ bool is_number(std::string s)
                      });
 }
 
-[[nodiscard]] bool has_header(std::istream &is, std::size_t lines, char delim)
+[[nodiscard]] inline bool has_header(std::istream &is, std::size_t lines,
+                                     char delim)
 {
   dialect d;
   d.delimiter = delim;
@@ -375,7 +378,7 @@ bool is_number(std::string s)
   return has_header > 0;
 }
 
-[[nodiscard]] char guess_delimiter(std::istream &is, std::size_t lines)
+[[nodiscard]] inline char guess_delimiter(std::istream &is, std::size_t lines)
 {
   const std::vector preferred = {',', ';', '\t', ':', '|'};
 
@@ -442,8 +445,6 @@ bool is_number(std::string s)
 
 }  // detail namespace
 
-dialect csv_sniffer(std::istream &);
-
 ///
 /// *Sniffs* the format of a CSV file (delimiter, headers).
 ///
@@ -480,7 +481,7 @@ dialect csv_sniffer(std::istream &);
 /// his Python-DSV package (Wells, 2002) ehich was incorporated into Python
 /// v2.3.
 ///
-dialect csv_sniffer(std::istream &is)
+[[nodiscard]] inline dialect csv_sniffer(std::istream &is)
 {
   const std::size_t lines(20);
 
@@ -497,7 +498,7 @@ dialect csv_sniffer(std::istream &is)
 ///
 /// \param[in] is input stream containing CSV data
 ///
-parser::parser(std::istream &is) : parser(is, {})
+inline parser::parser(std::istream &is) : parser(is, {})
 {
   dialect_ = csv_sniffer(is);
 }
@@ -508,7 +509,7 @@ parser::parser(std::istream &is) : parser(is, {})
 /// \param[in] is input stream containing CSV data
 /// \param[in] d  dialect used for CSV data
 ///
-parser::parser(std::istream &is, const dialect &d)
+inline parser::parser(std::istream &is, const dialect &d)
   : is_(&is), filter_hook_(nullptr), dialect_(d)
 {
 }
@@ -516,7 +517,7 @@ parser::parser(std::istream &is, const dialect &d)
 ///
 /// \return a constant reference to the active CSV dialect
 ///
-const pocket_csv::dialect &parser::active_dialect() const
+inline const pocket_csv::dialect &parser::active_dialect() const
 {
   return dialect_;
 }
@@ -525,12 +526,12 @@ const pocket_csv::dialect &parser::active_dialect() const
 /// \param[in] delim separator character for fields
 /// \return          a reference to `this` object (fluent interface)
 ///
-parser &parser::delimiter(char delim) &
+inline parser &parser::delimiter(char delim) &
 {
   dialect_.delimiter = delim;
   return *this;
 }
-parser parser::delimiter(char delim) &&
+inline parser parser::delimiter(char delim) &&
 {
   dialect_.delimiter = delim;
   return *this;
@@ -540,13 +541,13 @@ parser parser::delimiter(char delim) &&
 /// \param[in] q quoting style (see `pocket_csv::dialect`)
 /// \return      a reference to `this` object (fluent interface)
 ///
-parser &parser::quoting(dialect::quoting_e q) &
+inline parser &parser::quoting(dialect::quoting_e q) &
 {
   dialect_.quoting = q;
   return *this;
 }
 
-parser parser::quoting(dialect::quoting_e q) &&
+inline parser parser::quoting(dialect::quoting_e q) &&
 {
   dialect_.quoting = q;
   return *this;
@@ -562,12 +563,12 @@ parser parser::quoting(dialect::quoting_e q) &&
 /// prohibited by RFC 4180, which states: *spaces are considered part of a
 /// field and should not be ignored*.
 ///
-parser &parser::trim_ws(bool t) &
+inline parser &parser::trim_ws(bool t) &
 {
   dialect_.trim_ws = t;
   return *this;
 }
-parser parser::trim_ws(bool t) &&
+inline parser parser::trim_ws(bool t) &&
 {
   dialect_.trim_ws = t;
   return *this;
@@ -594,12 +595,12 @@ parser parser::trim_ws(bool t) &&
 ///
 /// \see <http://stackoverflow.com/q/10593686/3235496>.
 ///
-parser &parser::filter_hook(filter_hook_t filter) &
+inline parser &parser::filter_hook(filter_hook_t filter) &
 {
   filter_hook_ = filter;
   return *this;
 }
-parser parser::filter_hook(filter_hook_t filter) &&
+inline parser parser::filter_hook(filter_hook_t filter) &&
 {
   filter_hook_ = filter;
   return *this;
@@ -608,7 +609,7 @@ parser parser::filter_hook(filter_hook_t filter) &&
 ///
 /// \return an iterator to the first record of the CSV file
 ///
-parser::const_iterator parser::begin() const
+inline parser::const_iterator parser::begin() const
 {
   assert(is_);
 
@@ -622,7 +623,7 @@ parser::const_iterator parser::begin() const
 ///
 /// \return an iterator used as sentry value to stop a cycle
 ///
-parser::const_iterator parser::end() const
+inline parser::const_iterator parser::end() const
 {
   return const_iterator();
 }
@@ -630,7 +631,7 @@ parser::const_iterator parser::end() const
 ///
 /// \return the next record of the CSV file
 ///
-void parser::const_iterator::get_input()
+inline void parser::const_iterator::get_input()
 {
   if (!ptr_)
   {
@@ -667,7 +668,7 @@ void parser::const_iterator::get_input()
 /// quotes. This also means the quotes need to be parsed out, this function
 /// accounts for that as well.
 ///
-parser::const_iterator::value_type parser::const_iterator::parse_line(
+inline parser::const_iterator::value_type parser::const_iterator::parse_line(
   const std::string &line)
 {
   value_type record;  // the return value

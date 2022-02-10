@@ -1,0 +1,17 @@
+version: '{branch}-{build}'
+configuration:
+- Debug
+- Release
+environment:
+  # Disables execution of PowerShell commands on Linux-based images.
+  APPVEYOR_YML_DISABLE_PS_LINUX: true
+  matrix:
+    - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu2004
+      CXX_COMPILER: clang++
+    - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu2004
+      CXX_COMPILER: g++
+init:
+- sh: sudo update-alternatives --set gcc /usr/bin/gcc-9
+- sh: sudo update-alternatives --set clang /usr/bin/clang-10
+build_script:
+- cd test ; make

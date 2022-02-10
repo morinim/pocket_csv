@@ -8,7 +8,6 @@ CXXFLAGS := -Wall -Wextra -Wpedantic --std=c++17
 # NO USER SERVICEABLE PARTS BELOW THIS LINE
 # ----------------------------------------------------------------------------
 SRC := $(wildcard *.cc)
-OBJ := $(SRC:.cc=.o)
 
 .PRECIOUS: %.o
 
@@ -19,7 +18,7 @@ directories:
 	${CP} ${RES_DIR}/* ${BIN_DIR} || true
 
 test: $(OBJ)
-	$(CXX) $(CXXFLAGS) $(OBJ) -o ${BIN_DIR}/test
+	$(CXX) $(CXXFLAGS) $(SRC) -o ${BIN_DIR}/test
 	cd ${BIN_DIR} ; ./test ; cd ..
 
 .phony:
