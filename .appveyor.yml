@@ -19,10 +19,10 @@ before_build:
 # The `-DCMAKE_BUILD_TYPE=` switch instructs cmake about the build type.
 # In PowerShell environment variables must prepended with `$env:`.
 - sh: CXX=$CXX_COMPILER cmake -B build/ -DCMAKE_BUILD_TYPE=$CONFIGURATION test/
-- ps: cmake -B build/ --config $env:CONFIGURATION test/
+- ps: cmake -B build/ -DCMAKE_BUILD_TYPE=$env:CONFIGURATION test/
 build_script:
 # cmake will call the appropriate build tool.
-- cmake --build build/
+- cmake --build build/ --config $env:CONFIGURATION
 test_script:
 - sh: cd build/ ; ctest -V -C $CONFIGURATION
 - ps: cd build/ ; ctest -V -C $env:CONFIGURATION
