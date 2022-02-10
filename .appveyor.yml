@@ -22,7 +22,8 @@ before_build:
 - ps: cmake -B build/ test/
 build_script:
 # cmake will call the appropriate build tool.
-- cmake --build build/
+- sh: cmake --build build/
+- ps: cmake --build build/ --config Release
 test_script:
 - sh: cd build/ ; ctest -V -C $CONFIGURATION
 - ps: cd build/ ; ctest -V -C $env:CONFIGURATION
