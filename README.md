@@ -1,3 +1,5 @@
+[![Build Status](https://ci.appveyor.com/api/projects/status/github/morinim/pocket_csv?svg=true)][appveyor]
+
 ## Overview
 
 A minimal implementation of a CSV parser in C++17.
@@ -15,7 +17,14 @@ Low memory footprint and ease of use are the main concerns.
 ### Reading a file
 
 ```c++
+std::istream is;
 
+// ...
+
+for (auto row : pocket_csv::parser(is))
+{
+  // do stuff with row here
+}
 ```
 
 ## Setting up the build
@@ -23,4 +32,7 @@ Low memory footprint and ease of use are the main concerns.
 
 ## License
 
-[Mozilla Public License v2.0](https://www.mozilla.org/MPL/2.0/) (also available in the accompanying `LICENSE` file).
+[Mozilla Public License v2.0][mpl2] (also available in the accompanying `LICENSE` file).
+
+[appveyor]: https://ci.appveyor.com/project/morinim/vita
+[mpl2]: https://www.mozilla.org/MPL/2.0/

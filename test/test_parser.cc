@@ -118,6 +118,26 @@ TEST_SUITE("POCKET_CSV")
 
 TEST_CASE("Reading")
 {
+  const std::vector<std::string> ss =
+  {
+    s_abalone_h, s_abalone_nh,
+    s_iris_h, s_iris_nh,
+    s_car_speed_h, s_car_speed_nh,
+    s_addresses,
+    s_air_travel
+  };
+
+  for (const auto &s : ss)
+  {
+    std::istringstream is(s);
+
+    for (auto record : pocket_csv::parser(is))
+      CHECK(record.size());
+  }
+}
+
+TEST_CASE("Reading")
+{
   // --------------------------------------------------------------
   std::istringstream abalone(s_abalone_h);
   pocket_csv::parser csv_abalone(abalone);
