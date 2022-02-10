@@ -141,7 +141,7 @@ TEST_SUITE("POCKET_CSV")
 
 TEST_CASE("Reading")
 {
-  for (const auto &[ds, info] : datasets_with_info)
+  for (auto [ds, info] : datasets_with_info)
   {
     std::istringstream is(ds);
 
@@ -282,19 +282,6 @@ TEST_CASE("Sniffer")
 
   const std::vector delimiters = {',', ';', ':', '\t'};
 
-  // A dataset of string / has_header pairs.
-  const std::vector<std::pair<std::string, bool>> ts =
-  {
-    {s_abalone_h, true},
-    {s_abalone_nh, false},
-    {s_iris_h, true},
-    {s_iris_nh, false},
-    {s_car_speed_h, true},
-    {s_car_speed_nh, false},
-    {s_addresses, false},
-    {s_air_travel, true}
-  };
-
   const auto controlla([](const std::string &s, bool h, char d)
                        {
                          std::istringstream is(s);
@@ -304,7 +291,7 @@ TEST_CASE("Sniffer")
                          CHECK(csvp.active_dialect().delimiter == d);
                        });
 
-  for (const auto &[ds, info] : datasets_with_info)
+  for (auto [ds, info] : datasets_with_info)
     if (info.cols > 1)
       for (auto c : delimiters)
       {

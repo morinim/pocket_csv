@@ -24,5 +24,5 @@ build_script:
 # cmake will call the appropriate build tool.
 - cmake --build build/
 test_script:
-- sh: cd build/ ; ./ctest -V -C $CONFIGURATION
-# - ps: cd build/ ; ctest -V -C $env:CONFIGURATION
+- sh: cd build/ ; ctest -V -C $CONFIGURATION
+- ps: cd build/ ; ctest -V -C $env:CONFIGURATION
