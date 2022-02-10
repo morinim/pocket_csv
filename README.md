@@ -9,7 +9,7 @@ Low memory footprint and ease of use are the main concerns.
 - Single-threaded. No additional worker threads.
 - Lazy evaluated. Tokenization is not performed until the row is read.
 - Single header file. Just include `"pocket_csv.h"`.
-- *Automatic* delimiter guessing.
+- *Automatic* dialect guessing (delimiter, header...).
 - Only standard C++17.
 
 ## Documentation
@@ -23,12 +23,29 @@ std::istream is;
 
 for (auto row : pocket_csv::parser(is))
 {
-  // do stuff with row here
+  // do stuff with rows here
 }
 ```
 
-## Setting up the build
+### Specifying the CSV Format
 
+The parser has a decent guessing mechanism but, in some cases, it's preferrable to specify the exact parameters of the CSV file.
+
+```c++
+std::istream is;
+
+// ...
+pocket_csv::dialect dialect;
+
+dialect.delimiter = '|';
+dialect.quote = '*';
+
+for (auto row : pocket_csv::parser(is, dialect))
+{
+  // do stuff with rows here
+}
+
+```
 
 ## License
 

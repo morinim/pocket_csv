@@ -494,7 +494,7 @@ struct char_stat
 }
 
 ///
-/// Initializes theparser trying to sniff the CSV format.
+/// Initializes the parser trying to sniff the CSV format.
 ///
 /// \param[in] is input stream containing CSV data
 ///
@@ -590,8 +590,8 @@ inline parser parser::trim_ws(bool t) &&
 ///     for (auto record : parser(f).filter_hook(filter)) { ... }
 ///
 /// but that's broken (it only works if `filter_hook` returns by value).
-/// `parser` is a lighweight parser and this shouldn't be a performance
-/// concern.
+/// `parser` is a lighweight object and this shouldn't have an impact on
+/// performance.
 ///
 /// \see <http://stackoverflow.com/q/10593686/3235496>.
 ///

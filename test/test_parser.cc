@@ -130,8 +130,8 @@ const std::vector<std::pair<std::string, dataset_info>> datasets_with_info =
   {s_car_speed_nh, {false, 10u, 3u}},
   {s_addresses, {false, 6u, 6u}},
   {s_air_travel, {true, 13u, 4u}},
-  {s_colors_h, {true, 10u, 1u}},
-  {s_colors_nh, {false, 9u, 1u}},
+  {s_colors_h, {true, 11u, 1u}},
+  {s_colors_nh, {false, 10u, 1u}},
   {s_numbers_h, {true, 6u, 1u}},
   {s_numbers_nh, {false, 5u, 1u}}
 };
@@ -150,6 +150,11 @@ TEST_CASE("Reading")
       const auto cols(info.cols);
       CHECK(record.size() == cols);
     }
+
+    pocket_csv::parser parser(is);
+    const auto cells(info.rows);
+    const auto dist(std::distance(parser.begin(), parser.end()));
+    CHECK(dist == cells);
   }
 }
 
