@@ -13,8 +13,7 @@ environment:
       CXX_COMPILER: g++
 init:
 - sh: sudo update-alternatives --set gcc /usr/bin/gcc-9
-#- sh: sudo update-alternatives --set clang /usr/bin/clang-11
-- sh: clang++ --version
+- sh: sudo update-alternatives --set clang /usr/bin/clang-10
 before_build:
 # Essentially the build command is `cmake -B build/ src/`.
 # The `-DCMAKE_BUILD_TYPE=` switch instructs cmake about the build type.
