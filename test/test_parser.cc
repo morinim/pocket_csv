@@ -146,7 +146,10 @@ TEST_CASE("Reading")
     std::istringstream is(ds);
 
     for (auto record : pocket_csv::parser(is))
-      CHECK(record.size() == info.cols);
+    {
+      const auto cols(info.cols);
+      CHECK(record.size() == cols);
+    }
   }
 }
 
