@@ -316,4 +316,17 @@ TEST_CASE("Sniffer")
       controlla(ds, info.has_header, '\n');
 }
 
+TEST_CASE("Filtering")
+{
+  const auto filter([](const auto &row)
+                    {
+                      return row.back() == "Iris-setosa";
+                    });
+
+  std::istringstream is(s_iris_nh);
+
+  for (auto record : pocket_csv::parser(is).filter_hook(filter))
+    CHECK(record.back() == "Iris-setosa");
+}
+
 }  // TEST_SUITE("POCKET_CSV")

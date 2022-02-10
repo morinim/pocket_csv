@@ -47,6 +47,21 @@ for (auto row : pocket_csv::parser(is, dialect))
 
 ```
 
+### Filtering rows
+
+```c++
+auto filter = [](const auto &row) { return row.front() != ""; };
+
+std::istringstream is;
+
+// ...
+
+for (auto row : pocket_csv::parser(is).filter_hook(filter))
+{
+  // do stuff with rows having a not empty first element
+}
+```
+
 ## License
 
 [Mozilla Public License v2.0][mpl2] (also available in the accompanying `LICENSE` file).
