@@ -1,4 +1,6 @@
+![C++17](https://img.shields.io/badge/c%2B%2B-17-blue.svg)
 [![Build Status](https://ci.appveyor.com/api/projects/status/github/morinim/pocket_csv?svg=true)][appveyor]
+[![License](https://img.shields.io/badge/license-MPLv2-blue.svg)][mpl2]
 
 ## Overview
 
@@ -18,25 +20,24 @@ Low memory footprint and ease of use are the main concerns.
 
 ```c++
 std::istream is;
-
 // ...
 
 for (auto row : pocket_csv::parser(is))
-{
-  // do stuff with rows here
-}
+  for (auto cell : row)
+  {
+    // do stuff with cells here
+  }
 ```
 
-### Specifying the CSV Format
+### Specifying the CSV format
 
 The parser has a decent guessing mechanism but, in some cases, it's preferrable to specify the exact parameters of the CSV file.
 
 ```c++
 std::istream is;
-
 // ...
-pocket_csv::dialect dialect;
 
+pocket_csv::dialect dialect;
 dialect.delimiter = '|';
 dialect.quote = '*';
 
@@ -53,7 +54,6 @@ for (auto row : pocket_csv::parser(is, dialect))
 auto filter = [](const auto &row) { return row.front() != ""; };
 
 std::istringstream is;
-
 // ...
 
 for (auto row : pocket_csv::parser(is).filter_hook(filter))

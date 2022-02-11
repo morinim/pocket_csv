@@ -481,7 +481,7 @@ struct char_stat
 /// his Python-DSV package (Wells, 2002) ehich was incorporated into Python
 /// v2.3.
 ///
-[[nodiscard]] inline dialect csv_sniffer(std::istream &is)
+[[nodiscard]] inline dialect sniffer(std::istream &is)
 {
   const std::size_t lines(20);
 
@@ -500,7 +500,7 @@ struct char_stat
 ///
 inline parser::parser(std::istream &is) : parser(is, {})
 {
-  dialect_ = csv_sniffer(is);
+  dialect_ = sniffer(is);
 }
 
 ///
