@@ -19,7 +19,6 @@
 #include <fstream>
 #include <functional>
 #include <map>
-#include <optional>
 #include <sstream>
 
 namespace pocket_csv
@@ -33,8 +32,9 @@ namespace pocket_csv
 ///
 struct dialect
 {
-  /// A one-character string used to separate fields.
-  std::optional<char> delimiter = {};
+  /// A one-character string used to separate fields. When `0` triggers the
+  /// sniffer.
+  char delimiter = 0;
   /// When `true` skips leading and trailing spaces adjacent to commas.
   bool trim_ws = false;
   /// When `HAS_HEADER` assumes a header row is present. When `GUESS_HEADER`
@@ -490,7 +490,7 @@ struct char_stat
   dialect d;
 
   d.delimiter = detail::guess_delimiter(is, lines);
-  d.has_header = detail::has_header(is, lines, *d.delimiter);
+  d.has_header = detail::has_header(is, lines, d.delimiter);
 
   return d;
 }
