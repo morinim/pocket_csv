@@ -17,7 +17,7 @@
 
 struct dataset_info
 {
-  bool has_header;
+  pocket_csv::dialect::header_e has_header;
   std::size_t rows;
   std::size_t cols;
 };
@@ -122,18 +122,18 @@ VALUE
 
 const std::vector<std::pair<std::string, dataset_info>> datasets_with_info =
 {
-  {s_abalone_h, {true, 11u, 9u}},
-  {s_abalone_nh, {false, 10u, 9u}},
-  {s_iris_h, {true, 11u, 5u}},
-  {s_iris_nh, {false, 10u, 5u}},
-  {s_car_speed_h, {true, 11u, 3u}},
-  {s_car_speed_nh, {false, 10u, 3u}},
-  {s_addresses, {false, 6u, 6u}},
-  {s_air_travel, {true, 13u, 4u}},
-  {s_colors_h, {true, 11u, 1u}},
-  {s_colors_nh, {false, 10u, 1u}},
-  {s_numbers_h, {true, 6u, 1u}},
-  {s_numbers_nh, {false, 5u, 1u}}
+  {s_abalone_h, {pocket_csv::dialect::HAS_HEADER, 11u, 9u}},
+  {s_abalone_nh, {pocket_csv::dialect::NO_HEADER, 10u, 9u}},
+  {s_iris_h, {pocket_csv::dialect::HAS_HEADER, 11u, 5u}},
+  {s_iris_nh, {pocket_csv::dialect::NO_HEADER, 10u, 5u}},
+  {s_car_speed_h, {pocket_csv::dialect::HAS_HEADER, 11u, 3u}},
+  {s_car_speed_nh, {pocket_csv::dialect::NO_HEADER, 10u, 3u}},
+  {s_addresses, {pocket_csv::dialect::NO_HEADER, 6u, 6u}},
+  {s_air_travel, {pocket_csv::dialect::HAS_HEADER, 13u, 4u}},
+  {s_colors_h, {pocket_csv::dialect::HAS_HEADER, 11u, 1u}},
+  {s_colors_nh, {pocket_csv::dialect::NO_HEADER, 10u, 1u}},
+  {s_numbers_h, {pocket_csv::dialect::HAS_HEADER, 6u, 1u}},
+  {s_numbers_nh, {pocket_csv::dialect::NO_HEADER, 5u, 1u}}
 };
 
 TEST_SUITE("POCKET_CSV")
@@ -290,7 +290,7 @@ TEST_CASE("Sniffer")
 
   const std::vector delimiters = {',', ';', ':', '\t'};
 
-  const auto controlla([](const std::string &s, bool h, char d)
+  const auto controlla([](const std::string &s, dialect::header_e h, char d)
                        {
                          std::istringstream is(s);
                          pocket_csv::parser csvp(is);
