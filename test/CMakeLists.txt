@@ -21,12 +21,6 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "GNU"
   # `-Wconversion`, `-Wsign-conversion`, `-Weffc++` are other interesting
   # switches to try from time to time (they give many false positives).
 
-  set(OTHER_FLAGS "-pipe" "-march=native")
-
-  set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -DBOOST_DISABLE_ASSERTS")
-
-  set(CMAKE_EXE_LINKER_FLAGS_RELEASE "-s")
-
 elseif (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
 
   set(NO_WARN_FLAGS "/w")
