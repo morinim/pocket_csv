@@ -2,7 +2,7 @@
  *  \file
  *  \remark This file is part of POCKET_CSV.
  *
- *  \copyright Copyright (C) 2016-2023 Manlio Morini.
+ *  \copyright Copyright (C) 2016-2024 Manlio Morini.
  *
  *  \license
  *  This Source Code Form is subject to the terms of the Mozilla Public
@@ -34,24 +34,25 @@ struct dialect
 {
   /// A one-character string used to separate fields. When `0` triggers the
   /// sniffer.
-  char delimiter = 0;
+  char delimiter {0};
   /// When `true` skips leading and trailing spaces adjacent to commas.
-  bool trim_ws = false;
+  bool trim_ws {false};
   /// When `HAS_HEADER` assumes a header row is present. When `GUESS_HEADER`
   /// triggers the sniffer.
   enum header_e {GUESS_HEADER = -1, NO_HEADER = 0, HAS_HEADER = 1} has_header
-    = GUESS_HEADER;
+  {GUESS_HEADER};
   /// Controls if quotes should be keep by the reader.
   /// - `KEEP_QUOTES`. Always keep the quotes;
   /// - `REMOVE_QUOTES`. Never keep quotes.
   /// It defaults to `REMOVE_QUOTES`.
-  enum quoting_e {KEEP_QUOTES, REMOVE_QUOTES} quoting = REMOVE_QUOTES;
+  enum quoting_e {KEEP_QUOTES, REMOVE_QUOTES} quoting {REMOVE_QUOTES};
 };  // class dialect
 
 ///
 /// Simple parser for CSV files.
 ///
-/// \warning The class doesn't support multi-line fields.
+/// \warning
+/// The class doesn't support multi-line fields.
 ///
 class parser
 {
@@ -78,13 +79,13 @@ public:
 
   class const_iterator;
   [[nodiscard]] const_iterator begin() const;
-  [[nodiscard]] const_iterator end() const;
+  [[nodiscard]] const_iterator end() const noexcept;
 
 private:
   // DO NOT move this. `is` must be initialized before other data members.
   std::istream *is_;
 
-  filter_hook_t filter_hook_;
+  filter_hook_t filter_hook_ {nullptr};
   dialect dialect_;
 };  // class parser
 
@@ -102,10 +103,10 @@ public:
   using reference = value_type &;
   using const_reference = const value_type &;
 
-  const_iterator(std::istream *is = nullptr,
-                 parser::filter_hook_t f = nullptr,
-                 const dialect &d = {})
-    : ptr_(is), filter_hook_(f), dialect_(d), value_()
+  explicit const_iterator(std::istream *is = nullptr,
+                          parser::filter_hook_t f = nullptr,
+                          const dialect &d = {})
+    : ptr_(is), filter_hook_(f), dialect_(d)
   {
     if (ptr_)
       get_input();
@@ -119,21 +120,24 @@ public:
   }
 
   /// \return reference to the current record of the CSV file
-  const_reference operator*() const { return value_; }
+  [[nodiscard]] const_reference operator*() const noexcept { return value_; }
 
   /// \return pointer to the current record of the CSV file
-  const_pointer operator->() const { return &operator*(); }
+  [[nodiscard]] const_pointer operator->() const noexcept
+  { return &operator*(); }
 
   /// \param[in] lhs first term of comparison
   /// \param[in] rhs second term of comparison
   /// \return        `true` if iterators point to the same line
-  friend bool operator==(const const_iterator &lhs, const const_iterator &rhs)
+  [[nodiscard]] friend bool operator==(const const_iterator &lhs,
+                                       const const_iterator &rhs)
   {
     return lhs.ptr_ == rhs.ptr_ && lhs.value_ == rhs.value_
            && (!lhs.ptr_ || lhs.ptr_->tellg() == rhs.ptr_->tellg());
   }
 
-  friend bool operator!=(const const_iterator &lhs, const const_iterator &rhs)
+  [[nodiscard]] friend bool operator!=(const const_iterator &lhs,
+                                       const const_iterator &rhs)
   {
     return !(lhs == rhs);
   }
@@ -149,10 +153,10 @@ private:
   std::istream *ptr_;
   parser::filter_hook_t filter_hook_;
   dialect dialect_;
-  value_type value_;
+  value_type value_ {};
 };  // class parser::const_iterator
 
-namespace detail
+namespace internal
 {
 
 enum column_tag {none_tag = 0, skip_tag = -1,
@@ -162,15 +166,15 @@ struct char_stat
 {
   char_stat(unsigned cf = 0, unsigned w = 0) : char_freq(cf), weight(w) {}
 
-  unsigned char_freq;
-  unsigned weight;
+  unsigned char_freq {0};
+  unsigned weight {0};
 };
 
 ///
 /// \param[in] s the input string
 /// \return      a copy of `s` with spaces removed on both sides of the string
 ///
-/// \see http://stackoverflow.com/a/24425221/3235496
+/// \see https://stackoverflow.com/a/24425221/3235496
 ///
 [[nodiscard]] inline std::string trim(const std::string &s)
 {
@@ -205,8 +209,8 @@ struct char_stat
 /// Calculates the mode of a sequence of natural numbers.
 ///
 /// \param[in] v a sequence of natural number
-/// \return    a vector of {mode, counter} pairs (the input sequence
-///            may have more than one mode)
+/// \return    a vector of `{mode, counter}` pairs (the input sequence may have
+///            more than one mode)
 ///
 /// \warning
 /// Assumes a sorted input vector.
@@ -218,7 +222,7 @@ struct char_stat
   if (v.empty())
     return {};
 
-  auto current(*v.begin());
+  auto current(v.front());
   unsigned count(1), max_count(1);
 
   std::vector<char_stat> ret({{current, 1}});
@@ -247,11 +251,11 @@ struct char_stat
 
 [[nodiscard]] inline int find_column_tag(const std::string &s)
 {
-  const auto ts(detail::trim(s));
+  const auto ts(internal::trim(s));
 
   if (ts.empty())
     return none_tag;
-  if (detail::is_number(ts))
+  if (internal::is_number(ts))
     return number_tag;
 
   return static_cast<int>(s.length());
@@ -259,7 +263,7 @@ struct char_stat
 
 [[nodiscard]] inline bool capitalized(std::string s)
 {
-  s = detail::trim(s);
+  s = internal::trim(s);
 
   return !s.empty() && std::isupper(s.front())
          && std::all_of(std::next(s.begin()), s.end(),
@@ -445,7 +449,7 @@ struct char_stat
   return res->first;
 }
 
-}  // detail namespace
+}  // namespace internal
 
 ///
 /// *Sniffs* the format of a CSV file (delimiter, headers).
@@ -489,8 +493,8 @@ struct char_stat
 
   dialect d;
 
-  d.delimiter = detail::guess_delimiter(is, lines);
-  d.has_header = detail::has_header(is, lines, d.delimiter);
+  d.delimiter = internal::guess_delimiter(is, lines);
+  d.has_header = internal::has_header(is, lines, d.delimiter);
 
   return d;
 }
@@ -512,7 +516,7 @@ inline parser::parser(std::istream &is) : parser(is, {})
 /// \param[in] d  dialect used for CSV data
 ///
 inline parser::parser(std::istream &is, const dialect &d)
-  : is_(&is), filter_hook_(nullptr), dialect_(d)
+  : is_(&is), dialect_(d)
 {
 }
 
@@ -580,7 +584,8 @@ inline parser parser::trim_ws(bool t) &&
 /// \param[in] filter a filter function for CSV records
 /// \return           a reference to `this` object (fluent interface)
 ///
-/// \note A filter function returns `true` for records to be keep.
+/// \note
+/// A filter function returns `true` for records to be keep.
 ///
 /// \warning
 /// Usually, in C++, a fluent interface returns a **reference**.
@@ -595,7 +600,7 @@ inline parser parser::trim_ws(bool t) &&
 /// `parser` is a lighweight object and this shouldn't have an impact on
 /// performance.
 ///
-/// \see <http://stackoverflow.com/q/10593686/3235496>.
+/// \see https://stackoverflow.com/q/10593686/3235496
 ///
 inline parser &parser::filter_hook(filter_hook_t filter) &
 {
@@ -625,7 +630,7 @@ inline parser::const_iterator parser::begin() const
 ///
 /// \return an iterator used as sentry value to stop a cycle
 ///
-inline parser::const_iterator parser::end() const
+inline parser::const_iterator parser::end() const noexcept
 {
   return const_iterator();
 }
@@ -651,7 +656,7 @@ inline void parser::const_iterator::get_input()
         *this = const_iterator();
         return;
       }
-    while (detail::trim(line).empty());
+    while (internal::trim(line).empty());
 
     value_ = parse_line(line);
   } while (filter_hook_ && !filter_hook_(value_));
@@ -683,7 +688,7 @@ inline parser::const_iterator::value_type parser::const_iterator::parse_line(
   const auto &add_field([&record, this](const std::string &field)
                         {
                           record.push_back(dialect_.trim_ws
-                                           ? detail::trim(field) : field);
+                                           ? internal::trim(field) : field);
                         });
 
   const auto length(line.length());
@@ -691,7 +696,7 @@ inline parser::const_iterator::value_type parser::const_iterator::parse_line(
   {
     const auto c(line[pos]);
 
-    if (!inquotes && detail::trim(curstring).empty()
+    if (!inquotes && internal::trim(curstring).empty()
         && c == quote)  // begin quote char
     {
       if (dialect_.quoting == dialect::KEEP_QUOTES)
