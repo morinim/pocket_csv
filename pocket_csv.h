@@ -251,7 +251,7 @@ struct char_stat
   return ret;
 }
 
-[[nodiscard]] inline int find_column_tag(const std::string &s)
+[[nodiscard]] inline column_tag find_column_tag(const std::string &s)
 {
   const auto ts(internal::trim(s));
 
@@ -260,7 +260,7 @@ struct char_stat
   if (internal::is_number(ts))
     return number_tag;
 
-  return static_cast<int>(s.length());
+  return static_cast<column_tag>(s.length());
 }
 
 [[nodiscard]] inline bool capitalized(std::string s)
@@ -311,7 +311,7 @@ struct char_stat
   parser.quoting(pocket_csv::dialect::REMOVE_QUOTES);
 
   const auto columns(header.size());
-  std::vector<int> column_types(columns, none_tag);
+  std::vector<internal::column_tag> column_types(columns, none_tag);
 
   unsigned checked(0);
   for (auto it(std::next(parser.begin())); it != parser.end(); ++it)
