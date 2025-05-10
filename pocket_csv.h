@@ -456,8 +456,9 @@ struct char_stat
 ///
 /// *Sniffs* the format of a CSV file (delimiter, headers).
 ///
-/// \param[in] is stream containing CSV data
-/// \return       a `dialect` object
+/// \param[in] is    stream containing CSV data
+/// \param[in] lines number of lines used for sniffing data format
+/// \return          a `dialect` object
 ///
 /// For detecting the **header** creates a dictionary of types of data in each
 /// column. If any column is of a single type (say, integers), *except* for the
@@ -489,10 +490,8 @@ struct char_stat
 /// his Python-DSV package (Wells, 2002) ehich was incorporated into Python
 /// v2.3.
 ///
-[[nodiscard]] inline dialect sniffer(std::istream &is)
+[[nodiscard]] inline dialect sniffer(std::istream &is, std::size_t lines = 20)
 {
-  const std::size_t lines(20);
-
   dialect d;
 
   d.delimiter = internal::guess_delimiter(is, lines);
