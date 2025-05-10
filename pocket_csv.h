@@ -15,12 +15,15 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cctype>
 #include <cmath>
+#include <cstdlib>
 #include <iomanip>
 #include <fstream>
 #include <functional>
 #include <map>
 #include <sstream>
+#include <vector>
 
 namespace pocket_csv
 {
