@@ -2,7 +2,7 @@
  *  \file
  *  \remark This file is part of POCKET_CSV.
  *
- *  \copyright Copyright (C) 2016-2024 Manlio Morini.
+ *  \copyright Copyright (C) 2022 Manlio Morini.
  *
  *  \license
  *  This Source Code Form is subject to the terms of the Mozilla Public
@@ -15,6 +15,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cmath>
 #include <iomanip>
 #include <fstream>
 #include <functional>
@@ -200,9 +201,10 @@ struct char_stat
   s = trim(s);
 
   char *end;
-  strtod(s.c_str(), &end);  // if no conversion can be performed, `end` is set
-                            // to `s.c_str()`
-  return end != s.c_str() && *end == '\0';
+  const double val(std::strtod(s.c_str(), &end));  // if no conversion can be
+                                                   // performed, `end` is set
+                                                   // to `s.c_str()`
+  return end != s.c_str() && *end == '\0' && std::isfinite(val);
 }
 
 ///
