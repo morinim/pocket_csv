@@ -183,14 +183,14 @@ struct char_stat
 [[nodiscard]] inline std::string trim(const std::string &s)
 {
   const auto front(std::find_if_not(
-               s.begin(), s.end(),
-               [](auto c) { return std::isspace(c); }));
+                     s.begin(), s.end(),
+                     [](unsigned char c) { return std::isspace(c); }));
 
   // The search is limited in the reverse direction to the last non-space value
   // found in the search in the forward direction.
   const auto back(std::find_if_not(
                     s.rbegin(), std::make_reverse_iterator(front),
-                    [](auto c) { return std::isspace(c); }).base());
+                    [](unsigned char c) { return std::isspace(c); }).base());
 
   return {front, back};
 }
@@ -272,7 +272,7 @@ struct char_stat
 
   return !s.empty() && std::isupper(s.front())
          && std::all_of(std::next(s.begin()), s.end(),
-                        [](auto c)
+                        [](unsigned char c)
                         {
                           return std::isprint(c)
                                  && (!std::isalpha(c) || std::islower(c));
@@ -282,7 +282,7 @@ struct char_stat
 [[nodiscard]] inline bool lower_case(const std::string &s)
 {
   return std::all_of(s.begin(), s.end(),
-                     [](auto c)
+                     [](unsigned char c)
                      {
                        return !std::isalpha(c) || std::islower(c);
                      });
@@ -291,7 +291,7 @@ struct char_stat
 [[nodiscard]] inline bool upper_case(const std::string &s)
 {
   return std::all_of(s.begin(), s.end(),
-                     [](auto c)
+                     [](unsigned char c)
                      {
                        return !std::isalpha(c) || std::isupper(c);
                      });
