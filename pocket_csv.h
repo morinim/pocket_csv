@@ -64,19 +64,19 @@ public:
   explicit parser(std::istream &);
   parser(std::istream &, const dialect &);
 
-  [[nodiscard]] const dialect &active_dialect() const;
+  [[nodiscard]] const dialect &active_dialect() const noexcept;
 
-  parser &delimiter(char) &;
-  parser delimiter(char) &&;
+  parser &delimiter(char) & noexcept;
+  parser delimiter(char) && noexcept;
 
-  parser &quoting(dialect::quoting_e) &;
-  parser quoting(dialect::quoting_e) &&;
+  parser &quoting(dialect::quoting_e) & noexcept;
+  parser quoting(dialect::quoting_e) && noexcept;
 
-  parser &trim_ws(bool) &;
-  parser trim_ws(bool) &&;
+  parser &trim_ws(bool) & noexcept;
+  parser trim_ws(bool) && noexcept;
 
-  parser &filter_hook(filter_hook_t) &;
-  parser filter_hook(filter_hook_t) &&;
+  parser &filter_hook(filter_hook_t) & noexcept;
+  parser filter_hook(filter_hook_t) && noexcept;
 
   class const_iterator;
   [[nodiscard]] const_iterator begin() const;
@@ -131,14 +131,14 @@ public:
   /// \param[in] rhs second term of comparison
   /// \return        `true` if iterators point to the same line
   [[nodiscard]] friend bool operator==(const const_iterator &lhs,
-                                       const const_iterator &rhs)
+                                       const const_iterator &rhs) noexcept
   {
     return lhs.ptr_ == rhs.ptr_ && lhs.value_ == rhs.value_
            && (!lhs.ptr_ || lhs.ptr_->tellg() == rhs.ptr_->tellg());
   }
 
   [[nodiscard]] friend bool operator!=(const const_iterator &lhs,
-                                       const const_iterator &rhs)
+                                       const const_iterator &rhs) noexcept
   {
     return !(lhs == rhs);
   }
@@ -525,7 +525,7 @@ inline parser::parser(std::istream &is, const dialect &d)
 ///
 /// \return a constant reference to the active CSV dialect
 ///
-inline const pocket_csv::dialect &parser::active_dialect() const
+inline const pocket_csv::dialect &parser::active_dialect() const noexcept
 {
   return dialect_;
 }
@@ -534,12 +534,12 @@ inline const pocket_csv::dialect &parser::active_dialect() const
 /// \param[in] delim separator character for fields
 /// \return          a reference to `this` object (fluent interface)
 ///
-inline parser &parser::delimiter(char delim) &
+inline parser &parser::delimiter(char delim) & noexcept
 {
   dialect_.delimiter = delim;
   return *this;
 }
-inline parser parser::delimiter(char delim) &&
+inline parser parser::delimiter(char delim) && noexcept
 {
   dialect_.delimiter = delim;
   return *this;
@@ -549,13 +549,13 @@ inline parser parser::delimiter(char delim) &&
 /// \param[in] q quoting style (see `pocket_csv::dialect`)
 /// \return      a reference to `this` object (fluent interface)
 ///
-inline parser &parser::quoting(dialect::quoting_e q) &
+inline parser &parser::quoting(dialect::quoting_e q) & noexcept
 {
   dialect_.quoting = q;
   return *this;
 }
 
-inline parser parser::quoting(dialect::quoting_e q) &&
+inline parser parser::quoting(dialect::quoting_e q) && noexcept
 {
   dialect_.quoting = q;
   return *this;
@@ -571,12 +571,12 @@ inline parser parser::quoting(dialect::quoting_e q) &&
 /// prohibited by RFC 4180, which states: *spaces are considered part of a
 /// field and should not be ignored*.
 ///
-inline parser &parser::trim_ws(bool t) &
+inline parser &parser::trim_ws(bool t) & noexcept
 {
   dialect_.trim_ws = t;
   return *this;
 }
-inline parser parser::trim_ws(bool t) &&
+inline parser parser::trim_ws(bool t) && noexcept
 {
   dialect_.trim_ws = t;
   return *this;
@@ -604,12 +604,12 @@ inline parser parser::trim_ws(bool t) &&
 ///
 /// \see https://stackoverflow.com/q/10593686/3235496
 ///
-inline parser &parser::filter_hook(filter_hook_t filter) &
+inline parser &parser::filter_hook(filter_hook_t filter) & noexcept
 {
   filter_hook_ = filter;
   return *this;
 }
-inline parser parser::filter_hook(filter_hook_t filter) &&
+inline parser parser::filter_hook(filter_hook_t filter) && noexcept
 {
   filter_hook_ = filter;
   return *this;
