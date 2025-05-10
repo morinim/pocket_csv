@@ -136,7 +136,7 @@ public:
   [[nodiscard]] friend bool operator==(const const_iterator &lhs,
                                        const const_iterator &rhs) noexcept
   {
-    return lhs.ptr_ == rhs.ptr_ && lhs.value_ == rhs.value_
+    return lhs.ptr_ == rhs.ptr_
            && (!lhs.ptr_ || lhs.ptr_->tellg() == rhs.ptr_->tellg());
   }
 
