@@ -41,11 +41,11 @@ struct dialect
   char delimiter {0};
   /// When `true` skips leading and trailing spaces adjacent to commas.
   bool trim_ws {false};
-  /// When `HAS_HEADER` assumes a header row is present. When `GUESS_HEADER`
-  /// triggers the sniffer.
+  /// If `HAS_HEADER` assumes a header row is present; if `GUESS_HEADER`,
+  /// sniffs.
   enum header_e {GUESS_HEADER = -1, NO_HEADER = 0, HAS_HEADER = 1} has_header
   {GUESS_HEADER};
-  /// Controls if quotes should be keep by the reader.
+  /// Controls whether quotes should be keep by the reader.
   /// - `KEEP_QUOTES`. Always keep the quotes;
   /// - `REMOVE_QUOTES`. Never keep quotes.
   /// It defaults to `REMOVE_QUOTES`.
@@ -56,7 +56,7 @@ struct dialect
 /// Simple parser for CSV files.
 ///
 /// \warning
-/// The class doesn't support multi-line fields.
+/// This class does not support multi-line fields.
 ///
 class parser
 {
@@ -213,7 +213,7 @@ struct char_stat
 ///
 /// Calculates the mode of a sequence of natural numbers.
 ///
-/// \param[in] v a sequence of natural number
+/// \param[in] v a sequence of natural numbers
 /// \return    a vector of `{mode, counter}` pairs (the input sequence may have
 ///            more than one mode)
 ///
@@ -490,7 +490,7 @@ struct char_stat
 ///
 /// \note
 /// Somewhat inspired by the dialect sniffer developed by Clifford Wells for
-/// his Python-DSV package (Wells, 2002) ehich was incorporated into Python
+/// his Python-DSV package (Wells, 2002) which was incorporated into Python
 /// v2.3.
 ///
 [[nodiscard]] inline dialect sniffer(std::istream &is, std::size_t lines = 20)
@@ -514,7 +514,7 @@ inline parser::parser(std::istream &is) : parser(is, {})
 }
 
 ///
-/// Initializes theparser trying to sniff the CSV format.
+/// Initializes the parser trying by sniffing the CSV format.
 ///
 /// \param[in] is input stream containing CSV data
 /// \param[in] d  dialect used for CSV data
@@ -740,6 +740,34 @@ inline parser::const_iterator::value_type parser::const_iterator::parse_line(
   add_field(curstring);
 
   return record;
+}
+
+///
+/// Return the initial portion of a CSV file.
+///
+/// \param[in] is input stream
+/// \param[in] n  number of lines we want to extract
+/// \return       a vector containing the first `n` rows of `is`
+///
+[[nodiscard]] inline std::vector<parser::record_t> head(std::istream &is,
+                                                        std::size_t n)
+{
+  parser p(is);
+
+  auto it(p.begin());
+  if (p.active_dialect().has_header == dialect::HAS_HEADER)
+    ++it;
+
+  std::vector<parser::record_t> ret;
+  while (it != p.end() && n)
+  {
+    ret.push_back(*it);
+
+    ++it;
+    --n;
+  }
+
+  return ret;
 }
 
 }  // namespace pocket_csv

@@ -329,4 +329,23 @@ TEST_CASE("Filtering")
     CHECK(record.back() == "Iris-setosa");
 }
 
+TEST_CASE("Head")
+{
+  const auto &dif(datasets_with_info.front());
+  CHECK(dif.second.has_header);
+
+  std::istringstream is(dif.first);
+
+  SUBCASE("Skip header")
+  {
+    CHECK(pocket_csv::head(is, 1000).size() == dif.second.rows - 1);
+  }
+
+  SUBCASE("Cardinality")
+  {
+    for (std::size_t n(0); n < dif.second.rows; ++n)
+      CHECK(pocket_csv::head(is, n).size() == n);
+  }
+}
+
 }  // TEST_SUITE("POCKET_CSV")
