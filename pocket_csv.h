@@ -522,6 +522,8 @@ inline parser::parser(std::istream &is) : parser(is, {})
 inline parser::parser(std::istream &is, const dialect &d)
   : is_(&is), dialect_(d)
 {
+  is.clear();
+  is.seekg(0, std::ios::beg);  // back to the start!
 }
 
 ///
@@ -743,28 +745,61 @@ inline parser::const_iterator::value_type parser::const_iterator::parse_line(
 }
 
 ///
-/// Return the initial portion of a CSV file.
+/// Pretty-print the leading portion of a CSV file.
 ///
-/// \param[in] is input stream
-/// \param[in] n  number of lines we want to extract
-/// \return       a vector containing the first `n` rows of `is`
+/// \param[in] is input stream containing CSV data
+/// \param[in] n  number of data rows to extract
+/// \return       a vector whose first element is the header (if present;
+///               otherwise an empty row of the correct length), followed by up
+///               to `n` data rows that match the header's column count.
+///
+/// If the CSV has a header, it appears in the first element of the returned
+/// vector (`.front()`); otherwise the element is resized to the same width as
+/// the first conforming data row. Subsequent elements are the first `n` rows
+/// whose column count equals that of the first data row.
 ///
 [[nodiscard]] inline std::vector<parser::record_t> head(std::istream &is,
                                                         std::size_t n)
 {
   parser p(is);
-
-  auto it(p.begin());
-  if (p.active_dialect().has_header == dialect::HAS_HEADER)
-    ++it;
+  const bool has_header(p.active_dialect().has_header == dialect::HAS_HEADER);
 
   std::vector<parser::record_t> ret;
-  while (it != p.end() && n)
+
+  std::size_t expected_cols(0);
+
+  auto it(p.begin());
+  if (has_header)
   {
     ret.push_back(*it);
+    expected_cols = ret.front().size();
+    ++it;
+  }
+  else
+    // Placeholder row, we'll resize once we know the column count.
+    ret.emplace_back();
+
+  while (it != p.end() && n)
+  {
+    if (!expected_cols)
+      expected_cols = it->size();
+
+    if (it->size() == expected_cols)
+    {
+      ret.push_back(*it);
+      --n;
+    }
 
     ++it;
-    --n;
+  }
+
+  // If there was no header, resize the placeholder to match data rows.
+  if (!has_header)
+  {
+    if (ret.size() > 1)
+      ret.front().resize(ret[1].size());
+    else if (it != p.end() && it->size())
+      ret.front().resize(it->size());
   }
 
   return ret;

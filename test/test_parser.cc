@@ -2,7 +2,7 @@
  *  \file
  *  \remark This file is part of POCKET_CSV.
  *
- *  \copyright Copyright (C) 2020-2022 EOS di Manlio Morini.
+ *  \copyright Copyright (C) 2022 EOS di Manlio Morini.
  *
  *  \license
  *  This Source Code Form is subject to the terms of the Mozilla Public
@@ -331,20 +331,33 @@ TEST_CASE("Filtering")
 
 TEST_CASE("Head")
 {
-  const auto &dif(datasets_with_info.front());
-  CHECK(dif.second.has_header);
-
-  std::istringstream is(dif.first);
-
-  SUBCASE("Skip header")
+  SUBCASE("Empty dataset")
   {
-    CHECK(pocket_csv::head(is, 1000).size() == dif.second.rows - 1);
+    std::istringstream empty;
+    const auto head(pocket_csv::head(empty, 1000));
+
+    CHECK(head.size() == 1);
+    CHECK(head.front().empty());
   }
 
   SUBCASE("Cardinality")
   {
-    for (std::size_t n(0); n < dif.second.rows; ++n)
-      CHECK(pocket_csv::head(is, n).size() == n);
+    for (const auto &[ds, info] : datasets_with_info)
+    {
+      std::istringstream is(ds);
+
+      for (std::size_t n(0); n <= info.rows; ++n)
+      {
+        const auto head(pocket_csv::head(is, n));
+
+        if (info.has_header && n >= info.rows)
+          CHECK(head.size() == info.rows);
+        else
+          CHECK(head.size() == n + 1);
+
+        CHECK(head.front().size() == info.cols);
+      }
+    }
   }
 }
 
