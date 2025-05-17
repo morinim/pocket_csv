@@ -75,6 +75,9 @@ public:
   parser &quoting(dialect::quoting_e) & noexcept;
   parser quoting(dialect::quoting_e) && noexcept;
 
+  parser &skip_header() & noexcept;
+  parser skip_header() && noexcept;
+
   parser &trim_ws(bool) & noexcept;
   parser trim_ws(bool) && noexcept;
 
@@ -91,6 +94,7 @@ private:
 
   filter_hook_t filter_hook_ {nullptr};
   dialect dialect_;
+  bool skip_header_ {false};
 };  // class parser
 
 ///
@@ -566,6 +570,22 @@ inline parser parser::quoting(dialect::quoting_e q) && noexcept
 }
 
 ///
+/// Skips a possible header when iterating over the rows of the CSV file.
+///
+/// \return a reference to `this` object (fluent interface)
+///
+inline parser &parser::skip_header() & noexcept
+{
+  skip_header_ = true;
+  return *this;
+}
+inline parser parser::skip_header() && noexcept
+{
+  skip_header_ = true;
+  return *this;
+}
+
+///
 /// \param[in] t if `true` trims leading and trailing spaces adjacent to
 ///              commas
 /// \return      a reference to `this` object (fluent interface)
@@ -629,8 +649,17 @@ inline parser::const_iterator parser::begin() const
   is_->clear();
   is_->seekg(0, std::ios::beg);  // back to the start!
 
-  return *is_ ? const_iterator(is_, filter_hook_, dialect_)
-              : end();
+  if (*is_)
+  {
+    auto it(const_iterator(is_, filter_hook_, dialect_));
+
+    if (dialect_.has_header == dialect::HAS_HEADER && skip_header_)
+      ++it;
+
+    return it;
+  }
+
+  return end();
 }
 
 ///
@@ -758,8 +787,11 @@ inline parser::const_iterator::value_type parser::const_iterator::parse_line(
 /// the first conforming data row. Subsequent elements are the first `n` rows
 /// whose column count equals that of the first data row.
 ///
+/// Resets the reading position of the input stream to the beginning before
+/// returning.
+///
 [[nodiscard]] inline std::vector<parser::record_t> head(std::istream &is,
-                                                        std::size_t n)
+                                                        std::size_t n = 16)
 {
   parser p(is);
   const bool has_header(p.active_dialect().has_header == dialect::HAS_HEADER);
@@ -801,6 +833,9 @@ inline parser::const_iterator::value_type parser::const_iterator::parse_line(
     else if (it != p.end() && it->size())
       ret.front().resize(it->size());
   }
+
+  is.clear();
+  is.seekg(0, std::ios::beg);  // back to the start!
 
   return ret;
 }

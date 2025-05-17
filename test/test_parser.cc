@@ -160,71 +160,96 @@ TEST_CASE("Reading")
 
 TEST_CASE("Checking specific values")
 {
+  using row = pocket_csv::parser::record_t;
+
   // --------------------------------------------------------------
+  const pocket_csv::parser::record_t row1_abalone =
+    {"M", "0.455", "0.365", "0.095", "0.514", "0.2245", "0.101", "0.15", "15"};
+
   std::istringstream abalone(s_abalone_h);
   pocket_csv::parser csv_abalone(abalone);
   csv_abalone.trim_ws(true);
 
-  auto header_abalone(*csv_abalone.begin());
-  CHECK(header_abalone.size() == 9);
-  CHECK(header_abalone[0] == "sex");
-  CHECK(header_abalone[1] == "length");
-  CHECK(header_abalone[2] == "diameter");
-  CHECK(header_abalone[3] == "height");
-  CHECK(header_abalone[4] == "whole weight");
-  CHECK(header_abalone[5] == "shucked weight");
-  CHECK(header_abalone[6] == "viscera weight");
-  CHECK(header_abalone[7] == "shell weight");
-  CHECK(header_abalone[8] == "rings");
+  SUBCASE("Abalone")
+  {
+    auto header_abalone(*csv_abalone.begin());
+    CHECK(header_abalone.size() == 9);
+    CHECK(
+      header_abalone
+      == row{"sex", "length", "diameter", "height", "whole weight",
+             "shucked weight", "viscera weight", "shell weight", "rings"});
 
-  auto row1_abalone(*std::next(csv_abalone.begin()));
-  CHECK(row1_abalone.size() == 9);
-  CHECK(row1_abalone[0] == "M");
-  CHECK(row1_abalone[1] == "0.455");
-  CHECK(row1_abalone[2] == "0.365");
-  CHECK(row1_abalone[3] == "0.095");
-  CHECK(row1_abalone[4] == "0.514");
-  CHECK(row1_abalone[5] == "0.2245");
-  CHECK(row1_abalone[6] == "0.101");
-  CHECK(row1_abalone[7] == "0.15");
-  CHECK(row1_abalone[8] == "15");
+    const auto row1(*std::next(csv_abalone.begin()));
+    CHECK(row1.size() == 9);
+    CHECK(row1 == row1_abalone);
+  }
+
+  SUBCASE("Abalone skip header")
+  {
+    csv_abalone.skip_header();
+
+    const auto row1(*csv_abalone.begin());
+    CHECK(row1.size() == 9);
+    CHECK(row1 == row1_abalone);
+  }
 
   // --------------------------------------------------------------
+  const pocket_csv::parser::record_t row1_iris =
+    {"5.1", "3.5", "1.4", "0.2", "Iris-setosa"};
+
   std::istringstream iris(s_iris_h);
   pocket_csv::parser csv_iris(iris);
   csv_iris.trim_ws(true);
 
-  auto header_iris(*csv_iris.begin());
-  CHECK(header_iris.size() == 5);
-  CHECK(header_iris[0] == "sepal length");
-  CHECK(header_iris[1] == "sepal width");
-  CHECK(header_iris[2] == "petal length");
-  CHECK(header_iris[3] == "petal width");
-  CHECK(header_iris[4] == "class");
+  SUBCASE("Iris")
+  {
+    const auto header_iris(*csv_iris.begin());
+    CHECK(header_iris.size() == 5);
+    CHECK(
+      header_iris
+      == row{"sepal length", "sepal width", "petal length", "petal width",
+             "class"});
 
-  auto row1_iris(*std::next(csv_iris.begin()));
-  CHECK(row1_iris.size() == 5);
-  CHECK(row1_iris[0] == "5.1");
-  CHECK(row1_iris[1] == "3.5");
-  CHECK(row1_iris[2] == "1.4");
-  CHECK(row1_iris[3] == "0.2");
-  CHECK(row1_iris[4] == "Iris-setosa");
+    const auto row1(*std::next(csv_iris.begin()));
+    CHECK(row1.size() == 5);
+    CHECK(row1 == row1_iris);
+  }
+
+  SUBCASE("Iris skip header")
+  {
+    csv_iris.skip_header();
+
+    const auto row1(*csv_iris.begin());
+    CHECK(row1.size() == 5);
+    CHECK(row1 == row1_iris);
+  }
 
   // --------------------------------------------------------------
+  const pocket_csv::parser::record_t row1_car_speed =
+    {"Blue", "32", "NewMexico"};
+
   std::istringstream car_speed(s_car_speed_h);
   pocket_csv::parser csv_car_speed(car_speed);
 
-  auto header_car_speed(*csv_car_speed.begin());
-  CHECK(header_car_speed.size() == 3);
-  CHECK(header_car_speed[0] == "Color");
-  CHECK(header_car_speed[1] == "Speed");
-  CHECK(header_car_speed[2] == "State");
+  SUBCASE("Car speed")
+  {
+    const auto header_car_speed(*csv_car_speed.begin());
+    CHECK(header_car_speed.size() == 3);
+    CHECK(header_car_speed == row{"Color", "Speed", "State"});
 
-  auto row1_car_speed(*std::next(csv_car_speed.begin()));
-  CHECK(row1_car_speed.size() == 3);
-  CHECK(row1_car_speed[0] == "Blue");
-  CHECK(row1_car_speed[1] == "32");
-  CHECK(row1_car_speed[2] == "NewMexico");
+    const auto row1(*std::next(csv_car_speed.begin()));
+    CHECK(row1.size() == 3);
+    CHECK(row1 == row1_car_speed);
+  }
+
+  SUBCASE("Car speed skip header")
+  {
+    csv_car_speed.skip_header();
+
+    const auto row1(*csv_car_speed.begin());
+    CHECK(row1.size() == 3);
+    CHECK(row1 == row1_car_speed);
+  }
 
   // --------------------------------------------------------------
   std::istringstream colors(s_colors_h);
@@ -243,45 +268,65 @@ TEST_CASE("Checking specific values")
   CHECK(row2_colors->front() == "Red");
 
   // --------------------------------------------------------------
+  const pocket_csv::parser::record_t row1_address =
+    {"John", "Doe", "120 jefferson st.", "Riverside", " NJ", " 08075"};
+  const pocket_csv::parser::record_t row2_address =
+    {"Jack", "McGinnis", "220 hobo Av.", "Phila", " PA", "09119"};
+
   std::istringstream addresses(s_addresses);
   pocket_csv::parser csv_addresses(addresses);
 
-  auto row1_addresses(*csv_addresses.begin());
-  CHECK(row1_addresses.size() == 6);
-  CHECK(row1_addresses[0] == "John");
-  CHECK(row1_addresses[1] == "Doe");
-  CHECK(row1_addresses[2] == "120 jefferson st.");
-  CHECK(row1_addresses[3] == "Riverside");
-  CHECK(row1_addresses[4] == " NJ");
-  CHECK(row1_addresses[5] == " 08075");
+  SUBCASE("Addresses")
+  {
+    const auto row1(*csv_addresses.begin());
+    CHECK(row1.size() == 6);
+    CHECK(row1 == row1_address);
 
-  auto row2_addresses(*std::next(csv_addresses.begin()));
-  CHECK(row2_addresses.size() == 6);
-  CHECK(row2_addresses[0] == "Jack");
-  CHECK(row2_addresses[1] == "McGinnis");
-  CHECK(row2_addresses[2] == "220 hobo Av.");
-  CHECK(row2_addresses[3] == "Phila");
-  CHECK(row2_addresses[4] == " PA");
-  CHECK(row2_addresses[5] == "09119");
+    const auto row2(*std::next(csv_addresses.begin()));
+    CHECK(row2.size() == 6);
+    CHECK(row2 == row2_address);
+  }
+
+  SUBCASE("Addresses skip header")
+  {
+    csv_addresses.skip_header();
+
+    const auto row1(*csv_addresses.begin());
+    CHECK(row1.size() == 6);
+    CHECK(row1 == row1_address);
+
+    const auto row2(*std::next(csv_addresses.begin()));
+    CHECK(row2.size() == 6);
+    CHECK(row2 == row2_address);
+  }
 
   // --------------------------------------------------------------
+  const pocket_csv::parser::record_t row1_air_travel =
+    {"JAN", "340", "360", "417"};
+
   std::istringstream air_travel(s_air_travel);
   pocket_csv::parser csv_air_travel(air_travel);
   csv_air_travel.trim_ws(true);
 
-  auto header_air_travel(*csv_air_travel.begin());
-  CHECK(header_air_travel.size() == 4);
-  CHECK(header_air_travel[0] == "Month");
-  CHECK(header_air_travel[1] == "1958");
-  CHECK(header_air_travel[2] == "1959");
-  CHECK(header_air_travel[3] == "1960");
+  SUBCASE("Air travel")
+  {
+    const auto header_air_travel(*csv_air_travel.begin());
+    CHECK(header_air_travel.size() == 4);
+    CHECK(header_air_travel == row{"Month", "1958", "1959", "1960"});
 
-  auto row1_air_travel(*std::next(csv_air_travel.begin()));
-  CHECK(row1_air_travel.size() == 4);
-  CHECK(row1_air_travel[0] == "JAN");
-  CHECK(row1_air_travel[1] == "340");
-  CHECK(row1_air_travel[2] == "360");
-  CHECK(row1_air_travel[3] == "417");
+    const auto row1(*std::next(csv_air_travel.begin()));
+    CHECK(row1.size() == 4);
+    CHECK(row1 == row1_air_travel);
+  }
+
+  SUBCASE("Air travel skip header")
+  {
+    csv_air_travel.skip_header();
+
+    const auto row1(*csv_air_travel.begin());
+    CHECK(row1.size() == 4);
+    CHECK(row1 == row1_air_travel);
+  }
 }
 
 TEST_CASE("Sniffer")
