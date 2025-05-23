@@ -379,7 +379,7 @@ TEST_CASE("Head")
   SUBCASE("Empty dataset")
   {
     std::istringstream empty;
-    const auto head(pocket_csv::head(empty, 1000));
+    const auto head(pocket_csv::head(empty, {}, 1000));
 
     CHECK(head.size() == 1);
     CHECK(head.front().empty());
@@ -391,9 +391,10 @@ TEST_CASE("Head")
     {
       std::istringstream is(ds);
 
+      const auto dialect(pocket_csv::sniffer(is));
       for (std::size_t n(0); n <= info.rows; ++n)
       {
-        const auto head(pocket_csv::head(is, n));
+        const auto head(pocket_csv::head(is, dialect, n));
 
         if (info.has_header && n >= info.rows)
           CHECK(head.size() == info.rows);
