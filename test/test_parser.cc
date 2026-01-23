@@ -358,7 +358,7 @@ TEST_CASE("Sniffer")
         controlla(s, info.has_header, c);
       }
     else
-      controlla(ds, info.has_header, '\n');
+      controlla(ds, info.has_header, '\0');
 }
 
 TEST_CASE("Filtering")

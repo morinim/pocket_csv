@@ -420,6 +420,30 @@ struct char_stat
   return vote_header > 0 ? dialect::HAS_HEADER : dialect::NO_HEADER;
 }
 
+///
+/// Attempts to infer the field delimiter used in a delimited text stream.
+///
+/// \param[in,out] is input stream to analyse. The stream is read sequentially
+///                   and left at the position reached after scanning
+/// \param[in] lines  maximum number of non-empty lines to inspect
+///
+/// \return           the inferred delimiter character, or `\0` if no suitable
+///                   delimiter can be determined. A return value of `\0`
+///                   indicates that the input is likely a single-column file
+///                   with no field delimiter.
+///
+/// The function scans up to `lines` non-empty lines from the input stream and
+/// counts occurrences of a small set of preferred delimiter characters
+/// (`,`, `;`, `\t`, `:`, `|`). A delimiter is selected if it:
+///
+/// - appears a consistent number of times per line (single, non-zero mode);
+/// - occurs in at least ~2/3 of the scanned non-empty lines.
+///
+/// \note
+/// Empty or whitespace-only lines are ignored. If no delimiter satisfies
+/// the consistency criteria, the function fails conservatively and returns
+/// `\0`, which should be interpreted as a single-column input.
+///
 [[nodiscard]] inline char guess_delimiter(std::istream &is, std::size_t lines)
 {
   const std::vector preferred = {',', ';', '\t', ':', '|'};
@@ -476,7 +500,7 @@ struct char_stat
                                   }));
 
   if (res->second.char_freq == 0)
-    return '\n';
+    return 0;
 
   // Delimiter must consistently appear in the input lines.
   if (3 * res->second.weight < 2 * scanned)
