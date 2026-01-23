@@ -1,5 +1,4 @@
 ![C++17](https://img.shields.io/badge/c%2B%2B-17-blue.svg)
-[![Build Status](https://ci.appveyor.com/api/projects/status/github/morinim/pocket_csv?svg=true)][appveyor]
 [![License](https://img.shields.io/badge/license-MPLv2-blue.svg)][mpl2]
 
 ## Overview
@@ -66,5 +65,5 @@ for (auto row : pocket_csv::parser(is).filter_hook(filter))
 
 [Mozilla Public License v2.0][mpl2] (also available in the accompanying `LICENSE` file).
 
-[appveyor]: https://ci.appveyor.com/project/morinim/vita
+
 [mpl2]: https://www.mozilla.org/MPL/2.0/
