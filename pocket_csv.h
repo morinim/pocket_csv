@@ -759,7 +759,7 @@ inline parser::const_iterator::value_type parser::const_iterator::parse_line(
                         });
 
   const auto length(line.length());
-  for (std::size_t pos(0); pos < length && line[pos]; ++pos)
+  for (std::size_t pos(0); pos < length; ++pos)
   {
     const auto c(line[pos]);
 
