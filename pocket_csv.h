@@ -194,6 +194,22 @@ private:
 namespace internal
 {
 
+/// Column classification tag.
+///
+/// Negative values represent semantic categories inferred for the column:
+/// - `number_tag`: numeric column;
+/// - `string_tag`: variable-length string column;
+/// - `skip_tag`: column to be ignored.
+///
+/// Non-negative values are used to encode structural information:
+/// - `0` (`none_tag`) indicates an unspecified or unknown column type;
+/// - a positive value indicates a fixed-length string column, where the value
+///   represents the exact string length.
+///
+/// \note
+/// This enum intentionally overloads semantic tags and structural data.
+/// In particular, positive values do not denote distinct enum constants but
+/// encode the fixed length of string columns.
 enum column_tag {none_tag = 0, skip_tag = -1,
                  number_tag = -2, string_tag = -3};
 
