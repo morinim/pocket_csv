@@ -99,12 +99,21 @@ private:
 };  // class parser
 
 ///
-/// A forward iterator for CSV records.
+/// Input iterator over CSV records.
+///
+/// This iterator models a **single-pass input iterator** backed by an
+/// `std::istream`. Advancing the iterator consumes data from the underlying
+/// stream.
+///
+/// \warning
+/// - Copies of this iterator share the same stream state;
+/// - comparing two non-end iterators for equality is not meaningful;
+/// - the only supported comparison is against the end iterator.
 ///
 class parser::const_iterator
 {
 public:
-  using iterator_category = std::forward_iterator_tag;
+  using iterator_category = std::input_iterator_tag;
   using difference_type = std::ptrdiff_t;
   using value_type = parser::record_t;
   using pointer = value_type *;
@@ -112,6 +121,22 @@ public:
   using reference = value_type &;
   using const_reference = const value_type &;
 
+  /// Constructs a CSV input iterator.
+  ///
+  /// \param[in] is pointer to the input stream to read from; if `nullptr`,
+  ///               constructs an end iterator
+  /// \param[in] f  optional filter function applied to each parsed record;
+  ///               records for which the function returns `false` are skipped
+  /// \param[in] d  CSV dialect used for parsing records
+  ///
+  /// \note
+  /// When constructed with a non-null stream pointer, the iterator
+  /// immediately reads and parses the first available record.
+  ///
+  /// \warning
+  /// This iterator is single-pass: advancing it consumes data from the
+  /// underlying stream and copies of the iterator share the same stream
+  /// state.
   explicit const_iterator(std::istream *is = nullptr,
                           parser::filter_hook_t f = nullptr,
                           const dialect &d = {})
@@ -135,20 +160,20 @@ public:
   [[nodiscard]] const_pointer operator->() const noexcept
   { return &operator*(); }
 
-  /// \param[in] lhs first term of comparison
-  /// \param[in] rhs second term of comparison
-  /// \return        `true` if iterators point to the same line
-  [[nodiscard]] friend bool operator==(const const_iterator &lhs,
-                                       const const_iterator &rhs) noexcept
-  {
-    return lhs.ptr_ == rhs.ptr_
-           && (!lhs.ptr_ || lhs.ptr_->tellg() == rhs.ptr_->tellg());
-  }
-
+  /// Compares two iterators for inequality.
+  ///
+  /// \param[in] lhs first iterator
+  /// \param[in] rhs second iterator
+  /// \return        `true` if the iterators differ
+  ///
+  /// \note
+  /// For this single-pass input iterator, comparison is only meaningful when
+  /// testing against the end iterator. Two non-end iterators referring to the
+  /// same stream compare equal.
   [[nodiscard]] friend bool operator!=(const const_iterator &lhs,
                                        const const_iterator &rhs) noexcept
   {
-    return !(lhs == rhs);
+    return lhs.ptr_ != rhs.ptr_;
   }
 
 private:
