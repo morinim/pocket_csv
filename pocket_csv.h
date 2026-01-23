@@ -14,6 +14,7 @@
 #define      POCKET_CSV_PARSER_H
 
 #include <algorithm>
+#include <bitset>
 #include <cassert>
 #include <cctype>
 #include <cmath>
@@ -169,8 +170,8 @@ public:
   ///
   /// \note
   /// For this single-pass input iterator, comparison is only meaningful when
-  /// testing against the end iterator. Two non-end iterators referring to the
-  /// same stream compare equal.
+  /// testing against the end iterator. Equality of two non-end iterators
+  /// does not imply interchangeable or repeatable traversal.
   [[nodiscard]] friend bool operator!=(const const_iterator &lhs,
                                        const const_iterator &rhs) noexcept
   {
@@ -261,7 +262,7 @@ struct char_stat
 /// Calculates the mode of a sequence of natural numbers.
 ///
 /// \param[in] v a sequence of natural numbers
-/// \return    a vector of `{mode, counter}` pairs (the input sequence may have
+/// \return    a vector of `char_stat` pairs (the input sequence may have
 ///            more than one mode)
 ///
 /// \warning
@@ -303,13 +304,12 @@ struct char_stat
 
 [[nodiscard]] inline column_tag find_column_tag(const std::string &s)
 {
-  const auto ts(internal::trim(s));
-
-  if (ts.empty())
+  if (const auto ts(internal::trim(s)); ts.empty())
     return none_tag;
-  if (internal::is_number(ts))
+  else if (internal::is_number(ts))
     return number_tag;
 
+  // Length is taken from the original field to preserve structural width.
   return static_cast<column_tag>(s.length());
 }
 
@@ -462,12 +462,22 @@ struct char_stat
 ///
 [[nodiscard]] inline char guess_delimiter(std::istream &is, std::size_t lines)
 {
-  const std::vector preferred = {',', ';', '\t', ':', '|'};
+  static const std::vector preferred = {',', ';', '\t', ':', '|'};
+  static const std::bitset<256> is_candidate([]
+  {
+    std::bitset<256> ret;
+
+    for (unsigned char c : preferred)
+      ret[c] = true;
+
+    return ret;
+  }());
 
   // `count[c]` is a vector with information about character `c`. It grows
   // one element every time a new input line is read.
   // `count[c][l]` contains the number of times character `c` appears in line
   // `l`.
+  // `count` only contains entries for preferred delimiter candidates.
   std::map<char, std::vector<unsigned>> count;
 
   std::size_t scanned(0);
@@ -478,11 +488,11 @@ struct char_stat
       continue;
 
     // A new non-empty line. Initially every character has a `0` counter.
-    for (auto c : preferred)
+    for (unsigned char c : preferred)
       count[c].push_back(0u);
 
-    for (auto c : line)
-      if (std::find(preferred.begin(), preferred.end(), c) != preferred.end())
+    for (unsigned char c : line)
+      if (is_candidate[c])
         ++count[c].back();
 
     --lines;
