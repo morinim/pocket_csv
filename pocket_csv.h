@@ -19,6 +19,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <iomanip>
+#include <iostream>
 #include <fstream>
 #include <functional>
 #include <map>
@@ -736,6 +737,11 @@ inline void parser::const_iterator::get_input()
 /// quotes. This also means the quotes need to be parsed out, this function
 /// accounts for that as well.
 ///
+/// \note
+/// If a quoted field is not terminated before the end of the line, the
+/// remainder of the line is treated as part of the field. Multi-line
+/// quoted fields are not supported.
+///
 inline parser::const_iterator::value_type parser::const_iterator::parse_line(
   const std::string &line)
 {
@@ -792,7 +798,17 @@ inline parser::const_iterator::value_type parser::const_iterator::parse_line(
       curstring.push_back(c);
   }
 
-  assert(!inquotes);
+  if (inquotes)
+  {
+#ifndef NDEBUG
+    std::cerr << "Warning: unterminated quoted field; line accepted as-is\n";
+#endif
+
+    // Unterminated quoted field: accept the field as-is.
+    // The closing quote is assumed to be missing.
+    // This mirrors what Excel, LibreOffice, and many CSV readers do in
+    // permissive mode.
+  }
 
   add_field(curstring);
 
