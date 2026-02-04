@@ -31,6 +31,17 @@
 namespace pocket_csv
 {
 
+namespace internal
+{
+
+inline void rewind(std::istream &is)
+{
+  is.clear();
+  is.seekg(0, std::ios::beg);
+}
+
+}  // namespace internal
+
 ///
 /// Information about the CSV dialect.
 ///
@@ -367,9 +378,7 @@ struct char_stat
   const auto header_it(parser.begin());
   if (header_it == parser.end())
   {
-    is.clear();
-    is.seekg(0, std::ios::beg);  // back to the start!
-
+    internal::rewind(is);
     return dialect::NO_HEADER;
   }
 
@@ -446,8 +455,7 @@ struct char_stat
         --vote_header;
     }
 
-  is.clear();
-  is.seekg(0, std::ios::beg);  // back to the start!
+  internal::rewind(is);
 
   return vote_header > 0 ? dialect::HAS_HEADER : dialect::NO_HEADER;
 }
@@ -619,8 +627,7 @@ inline parser::parser(std::istream &is) : parser(is, {})
 inline parser::parser(std::istream &is, const dialect &d)
   : is_(&is), dialect_(d)
 {
-  is.clear();
-  is.seekg(0, std::ios::beg);  // back to the start!
+  internal::rewind(is);
 }
 
 ///
@@ -739,8 +746,7 @@ inline parser::const_iterator parser::begin() const
 {
   assert(is_);
 
-  is_->clear();
-  is_->seekg(0, std::ios::beg);  // back to the start!
+  internal::rewind(*is_);
 
   if (*is_)
   {
@@ -944,8 +950,7 @@ inline parser::const_iterator::value_type parser::const_iterator::parse_line(
       ret.front().resize(it->size());
   }
 
-  is.clear();
-  is.seekg(0, std::ios::beg);  // back to the start!
+  internal::rewind(is);
 
   return ret;
 }
