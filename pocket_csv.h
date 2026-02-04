@@ -178,6 +178,13 @@ public:
     return lhs.ptr_ != rhs.ptr_;
   }
 
+  [[nodiscard]] friend bool operator==(const const_iterator &lhs,
+                                       const const_iterator &rhs) noexcept
+  {
+    return !(lhs.ptr_ != rhs.ptr_);
+  }
+
+
 private:
   value_type parse_line(const std::string &);
   void get_input();
@@ -357,7 +364,16 @@ struct char_stat
   // specific year. Notice the double quotes) and values `2012`, `2000`...
   // (the values observed during 1980).
   parser.quoting(pocket_csv::dialect::KEEP_QUOTES);
-  const auto header(*parser.begin());  // assume first row is header (2)
+  const auto header_it(parser.begin());
+  if (header_it == parser.end())
+  {
+    is.clear();
+    is.seekg(0, std::ios::beg);  // back to the start!
+
+    return dialect::NO_HEADER;
+  }
+
+  const auto header(*header_it);  // assume first row is header (2)
   parser.quoting(pocket_csv::dialect::REMOVE_QUOTES);
 
   const auto columns(header.size());
