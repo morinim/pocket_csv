@@ -711,20 +711,22 @@ inline parser parser::trim_ws(bool t) && noexcept
 /// \return           a reference to `this` object (fluent interface)
 ///
 /// \note
-/// A filter function returns `true` for records to be keep.
+/// A filter function returns `true` for records that should be kept.
 ///
 /// \warning
 /// Usually, in C++, a fluent interface returns a **reference**.
-/// Here we return a **copy** of `this` object. The design decision is due to
-/// the fact that a `parser' is a sort of Python generator and tends to be used
-/// in for-loops.
+/// Here we return a **copy** of the object instead. This design decision is
+/// due to the fact that `parser` behaves somewhat like a Python generator and
+/// tends to be used in range-based for-loops.
 /// Users often write:
 ///
 ///     for (auto record : parser(f).filter_hook(filter)) { ... }
 ///
-/// but that's broken (it only works if `filter_hook` returns by value).
-/// `parser` is a lighweight object and this shouldn't have an impact on
-/// performance.
+/// but that is broken if `filter_hook` returns a reference (it only works if
+/// it returns by value).
+///
+/// `parser` is lightweight, so returning by value should have negligible
+/// performance impact.
 ///
 /// \see https://stackoverflow.com/q/10593686/3235496
 ///
