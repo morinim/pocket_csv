@@ -76,7 +76,7 @@ class parser
 {
 public:
   using record_t = std::vector<std::string>;
-  using filter_hook_t = std::function<bool (record_t &)>;
+  using filter_hook_t = std::function<bool (const record_t &)>;
 
   explicit parser(std::istream &);
   parser(std::istream &, const dialect &);
@@ -616,6 +616,7 @@ struct char_stat
 inline parser::parser(std::istream &is) : parser(is, {})
 {
   dialect_ = sniffer(is);
+  // `sniffer` already rewinds.
 }
 
 ///
@@ -944,6 +945,7 @@ inline parser::const_iterator::value_type parser::const_iterator::parse_line(
   }
 
   // If there was no header, resize the placeholder to match data rows.
+  // If `n == 0`, we use the first data row only to determine the width.
   if (!has_header)
   {
     if (ret.size() > 1)
